@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# EXEMPLOS DIDÁTICOS — NÃO EXECUTADOS NESTE PROJETO.
-# EXECUTAR SOMENTE EM LABORATÓRIO PRÓPRIO E ISOLADO, COM AUTORIZAÇÃO.
-# Abaixo, apenas exemplos de sintaxe para estudo, limitados a uma única conta
-# e senhas de laboratório, sem concorrência agressiva.
+# EXEMPLO DIDÁTICO — NÃO EXECUTADO NESTE PROJETO.
+# Use somente em sistemas próprios, isolados e expressamente autorizados.
+# Este arquivo é inerte: apenas exibe comandos e não inicia Nmap, FTP ou Medusa.
 
-# 1. Verificar disponibilidade:
-medusa -V
+set -eu
 
-# 2. Exemplo NÃO EXECUTADO para FTP, contra conta criada/permitida no lab:
-# medusa -h 192.168.56.101 -u usuario_teste -P wordlists/senhas-exemplo.txt -M ftp -t 1
-
-# 3. O Nmap foi efetivamente executado na sessão prática:
-# nmap -sV 192.168.56.101
-
-# 4. Login FTP anônimo realmente executado de forma interativa:
-# ftp 192.168.56.101
-# usuário: anonymous; senha: Enter; depois ls e quit
-
-printf 'Exemplos didáticos; nenhum teste automatizado foi iniciado.\n'
+printf '%s\n' \
+  'Exemplos didáticos; nenhum teste será iniciado.' \
+  '' \
+  '# Verificação de versão (relatada, sem captura no repositório):' \
+  'medusa -V' \
+  '' \
+  '# Sintaxe de estudo para uma conta fictícia de laboratório — NÃO EXECUTADA:' \
+  'medusa -h 192.168.56.101 -u lab_usuario_01 -P wordlists/senhas-exemplo.txt -M ftp -t 1' \
+  '' \
+  '# Comandos executados interativamente e documentados no README:' \
+  'ping -c 4 192.168.56.101' \
+  'nmap -sV 192.168.56.101' \
+  'ftp 192.168.56.101'

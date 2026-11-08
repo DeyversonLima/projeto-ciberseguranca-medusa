@@ -1,43 +1,50 @@
 # Cenários estudados e medidas de mitigação
 
-**Importante:** os três cenários abaixo são discussões didáticas. Nenhuma campanha de força bruta, automação de formulário DVWA ou spraying SMB foi executada no laboratório apresentado.
+[Voltar ao README](../README.md)
 
-## Cenário A — FTP e senhas fracas
+> **Estado deste documento:** estudo didático. Nenhuma força bruta com Medusa, automação no DVWA ou campanha de *password spraying* SMB foi executada. Os exemplos se aplicam somente a ambientes próprios, isolados e autorizados.
 
-**Conceito:** ferramentas como Medusa recebem um host, um serviço, uma conta ou lista de contas e uma lista de senhas, executando tentativas para verificar se há credenciais fracas. Uma operação controlada usa poucas credenciais de laboratório, baixa concorrência e autorização explícita.
+## FTP e auditoria de senhas com Medusa
 
-**O que foi efetivamente observado:** FTP na porta 21 e login `anonymous` bem-sucedido sem senha. Isso é uma configuração de acesso distinta de força bruta; não demonstra que uma senha de usuário tenha sido descoberta.
+O Medusa recebe um host, um módulo de serviço e uma conta ou lista de contas e senhas para testar autenticações. Em um laboratório, o escopo deve usar contas fictícias criadas para o teste, poucas credenciais, baixa concorrência e monitoração dos logs.
 
-**Riscos:** exposição de conteúdo quando permissões de leitura anônima estão habilitadas; acesso de escrita indevido quando permissões são excessivas; ataques de adivinhação contra contas reais.
+**Observação prática relacionada:** a porta 21 estava aberta e o login `anonymous` com senha em branco foi aceito. Esse mecanismo de acesso não é uma senha descoberta e não comprova fraqueza de credenciais de outras contas.
 
-**Prevenção:** eliminar acesso anônimo quando desnecessário, restringir diretórios/ACL, migrar para SFTP, adotar senhas fortes, limites de tentativas, atualização e registro de logs.
+**Riscos a avaliar:** conteúdo exposto por leitura anônima, escrita indevida quando as permissões permitem e adivinhação de senhas de contas reais.
 
-## Cenário B — DVWA e formulário web
+**Mitigações:** desabilitar acesso anônimo sem necessidade, restringir diretórios e permissões, preferir SFTP, bloquear senhas comuns, limitar tentativas, aplicar atrasos progressivos, atualizar o serviço e monitorar logs.
 
-**Conceito:** em um ambiente didático como o DVWA, um formulário de login pode ser usado para observar diferenças entre respostas válidas e inválidas e discutir tentativas repetidas de credenciais.
+**Evidência necessária em uma execução futura:** comando e versão do Medusa, conta fictícia preparada, wordlist usada, intervalo e concorrência, saída completa, logs do servidor e resultado real — inclusive quando nenhuma credencial for aceita.
 
-**Fluxo hipotético:** acessar o DVWA no laboratório local, identificar o formulário e os campos, criar contas e credenciais de teste, observar respostas a tentativas limitadas e avaliar controles antiabuso. Não foram coletados cookies ou tokens de sessão e não foi executada automação real.
+## DVWA e formulário web
 
-**Riscos:** enumeração de contas, adivinhação de senhas e acesso indevido caso não haja controles.
+O DVWA permite estudar autenticação web em um alvo local deliberadamente vulnerável. Um exercício controlado pode identificar campos e respostas do formulário, usar uma conta fictícia, limitar tentativas e observar controles antiabuso. O DVWA não foi instalado, e cookies, tokens ou automações não foram coletados neste projeto.
 
-**Prevenção:** MFA, rate limiting, mecanismos antiabuso, autenticação resistente a enumeração, política de senhas e alertas.
+**Riscos a avaliar:** enumeração de contas, adivinhação de senhas, ausência de limitação de taxa e acesso indevido.
 
-## Cenário C — SMB e password spraying
+**Mitigações:** MFA, limitação de taxa, atrasos progressivos, proteção contra automação, respostas que não revelem a existência da conta, senhas fortes e alertas. Bloqueios rígidos precisam ser projetados para evitar abuso como negação de serviço.
 
-**Conceito:** password spraying testa uma senha candidata em diversas contas; força bruta tradicional testa muitas senhas numa conta ou serviço. O spraying visa reduzir a frequência de tentativas por conta, por isso o monitoramento deve correlacionar eventos entre múltiplos usuários.
+**Evidência necessária em uma execução futura:** versão e nível de segurança do DVWA, conta fictícia, URL local, requisição reproduzível com dados sensíveis ocultados, respostas observadas, limites aplicados e logs do servidor.
 
-**Fluxo hipotético:** em um domínio ou servidor SMB de laboratório com contas criadas deliberadamente, definir uma senha de teste e um pequeno conjunto de usuários autorizados, observar logs e comparar controles. A enumeração de usuários e as tentativas SMB não foram realizadas neste projeto.
+## SMB e *password spraying*
 
-**Riscos:** comprometimento de contas com senhas reutilizadas/fracas, movimento lateral e tentativas distribuídas de autenticação.
+*Password spraying* testa uma senha candidata em várias contas; força bruta tradicional testa várias senhas contra uma conta ou serviço. Detectar *spraying* exige correlacionar falhas entre diferentes usuários, origens e intervalos.
 
-**Prevenção:** MFA onde suportado, senhas distintas e robustas, desabilitar contas antigas, monitorar falhas em múltiplos usuários, limitar exposição SMB e aplicar políticas adequadas de bloqueio.
+Não houve enumeração de usuários nem tentativa SMB neste projeto. A presença das portas 139 e 445 no resultado do Nmap comprova apenas que serviços SMB estavam acessíveis durante o reconhecimento.
 
-## Checklist para ambientes reais
+**Riscos a avaliar:** contas com senhas comuns ou reutilizadas, acesso indevido e movimento lateral.
 
-- [ ] Inventário e minimização de serviços expostos.
-- [ ] Desativação de contas e permissões desnecessárias.
-- [ ] Atualizações e configuração segura.
-- [ ] Autenticação multifator onde disponível.
-- [ ] Proteção contra senhas comuns e vazadas.
-- [ ] Alertas sobre falhas de login em múltiplas contas.
-- [ ] Revisão periódica de logs, acessos e políticas.
+**Mitigações:** senhas exclusivas e robustas, MFA quando suportado, desativação de contas antigas, segmentação e restrição do SMB, correlação de falhas e política de bloqueio equilibrada.
+
+**Evidência necessária em uma execução futura:** contas fictícias previamente autorizadas, senha de teste, comando e versão da ferramenta, frequência das tentativas, saída completa, logs de autenticação e comprovação dos controles defensivos.
+
+## Síntese defensiva
+
+| Controle | FTP | Web/DVWA | SMB |
+| --- | --- | --- | --- |
+| Reduzir exposição e permissões | Sim | Sim | Sim |
+| Senhas exclusivas e bloqueio de senhas comuns | Sim | Sim | Sim |
+| MFA | Quando suportado | Recomendado | Quando suportado |
+| Limitação de tentativas e atrasos | Sim | Sim | Sim |
+| Correlação e alertas de autenticação | Sim | Sim | Essencial para *spraying* |
+| Atualização e configuração segura | Sim | Sim | Sim |
